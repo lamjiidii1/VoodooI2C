@@ -431,8 +431,6 @@ IOReturn VoodooI2CDeviceNub::callPlatformFunction(const OSSymbol *functionName,
     }
 
     if (functionName && functionName->isEqualTo(VOODOO_I2C_TRANSFER_TO_ADDRESS)) {
-        IOLog("%s::callPlatformFunction matched VOODOO_I2C_TRANSFER_TO_ADDRESS\n", getName());
-        setProperty("VoodooI2C_TransferMatched", kOSBooleanTrue);
         return transferI2CToAddress(static_cast<VoodooI2CAddressedTransfer *>(param1));
     }
 

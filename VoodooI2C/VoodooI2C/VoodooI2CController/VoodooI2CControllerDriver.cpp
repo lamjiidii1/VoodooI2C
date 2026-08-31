@@ -310,7 +310,6 @@ IOReturn VoodooI2CControllerDriver::initialiseBus() {
 }
 
 IOReturn VoodooI2CControllerDriver::prepareTransferI2C(VoodooI2CControllerBusMessage* messages, int* number) {
-    IOLog("%s::%s prepareTransfer entered\n", getName(), bus_device.name);
     AbsoluteTime abstime, deadline;
     IOReturn sleep;
 
@@ -356,6 +355,7 @@ IOReturn VoodooI2CControllerDriver::prepareTransferI2C(VoodooI2CControllerBusMes
     toggleBusState(kVoodooI2CStateOff);
 
     if (bus_device.message_error) {
+        setProperty("VoodooI2C_Driver_prepare_MsgErr", bus_device.message_error, 32);
         return kIOReturnError;
     }
 
@@ -363,10 +363,12 @@ IOReturn VoodooI2CControllerDriver::prepareTransferI2C(VoodooI2CControllerBusMes
         return kIOReturnSuccess;
 
     if (bus_device.command_error == DW_IC_ERR_TX_ABRT) {
+        setProperty("VoodooI2C_Driver_prepare_AbortSource", bus_device.abort_source, 32);
         handleAbortI2C();
         return kIOReturnError;
     }
 
+    setProperty("VoodooI2C_Driver_prepare_CmdErr", bus_device.command_error, 32);
     return kIOReturnNotReady;
 }
 
@@ -563,11 +565,6 @@ void VoodooI2CControllerDriver::requestTransferI2C() {
 
     toggleBusState(kVoodooI2CStateOn);
 
-    setProperty("DBG_ENABLE", readRegister(DW_IC_ENABLE), 32);
-    setProperty("DBG_ENABLE_STATUS", readRegister(DW_IC_ENABLE_STATUS), 32);
-    setProperty("DBG_STATUS", readRegister(DW_IC_STATUS), 32);
-    setProperty("DBG_TAR", messages[0].address, 32);
-
     /* Dummy read to avoid the register getting stuck on Bay Trail */
     readRegister(DW_IC_ENABLE_STATUS);
 
@@ -741,7 +738,6 @@ IOReturn VoodooI2CControllerDriver::transferI2CGated(VoodooI2CControllerBusMessa
             break;
     }
 
-    setProperty("VoodooI2C_Driver_transferI2CGated_Ret", (uint64_t)ret, 64);
     return ret;
 }
 
@@ -815,7 +811,6 @@ void VoodooI2CControllerDriver::transferMessageToBus() {
                 receive_limit--;
                 bus_device.receive_outstanding++;
             } else {
-                setProperty("DBG_DATA_CMD", command | *buffer, 32);
                 writeRegister(command | *buffer++, DW_IC_DATA_CMD);
             }
             transaction_limit--; buffer_length--;
