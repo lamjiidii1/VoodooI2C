@@ -29,13 +29,20 @@
 #define TP7G_RESOURCES_INDEX 1
 #define VOODOO_I2C_TRANSFER_TO_ADDRESS "VoodooI2CTransferToAddress"
 
-struct VoodooI2CAddressedTransfer {
+/* Encapsulates an I2C transfer targeted at a specific 7-bit slave address
+ * @address 7-bit slave device address
+ * @writeBuffer Data buffer to be written to the slave
+ * @writeLength Number of bytes to write
+ * @readBuffer Buffer to store data read from the slave
+ * @readLength Number of bytes to read
+ */
+typedef struct {
     UInt8 address;
-    UInt8 *writeBuffer;
+    UInt8* writeBuffer;
     UInt16 writeLength;
-    UInt8 *readBuffer;
+    UInt8* readBuffer;
     UInt16 readLength;
-};
+} VoodooI2CAddressedTransfer;
 
 class VoodooI2CControllerDriver;
 
@@ -305,10 +312,14 @@ class EXPORT VoodooI2CDeviceNub : public IOService {
      *
      * @return *kIOReturnSuccess* upon a successful read, *kIOReturnBusy* if the bus is busy, *kIOReturnTimeout* if the controller driver waits too long for the controller to assert its interrupt line, *kIOReturnError* otherwise
      */
-
     IOReturn writeReadI2CGated(UInt8* write_buffer, UInt16* write_length, UInt8* read_buffer, UInt16* read_length);
 
-    // Debug bridge for devices that need more than one I2C address.
+    /* Transmits an addressed I2C write and/or read request to a specified slave address
+     * @request The transfer structure containing target address, write and read buffers
+     *
+     * @return *kIOReturnSuccess* upon a successful transfer, *kIOReturnBadArgument* if the request or address is invalid,
+     * *kIOReturnNotReady* if the controller driver is not ready, *kIOReturnError* otherwise
+     */
     IOReturn transferI2CToAddress(VoodooI2CAddressedTransfer *request);
 
     /* Check if a boot-arg is present

@@ -31,3 +31,5 @@ docs/search.json
 docs/xml/*
 
 /MacKernelSDK
+.vscode/
+.editorconfig

@@ -426,10 +426,6 @@ IOReturn VoodooI2CDeviceNub::callPlatformFunction(const OSSymbol *functionName,
                                                   void *param2,
                                                   void *param3,
                                                   void *param4) {
-    if (functionName) {
-        setProperty("VoodooI2C_LastCallPlatformName", functionName->getCStringNoCopy());
-    }
-
     if (functionName && functionName->isEqualTo(VOODOO_I2C_TRANSFER_TO_ADDRESS)) {
         return transferI2CToAddress(static_cast<VoodooI2CAddressedTransfer *>(param1));
     }
@@ -437,28 +433,6 @@ IOReturn VoodooI2CDeviceNub::callPlatformFunction(const OSSymbol *functionName,
     return super::callPlatformFunction(functionName, waitForFunction, param1, param2, param3, param4);
 }
 
-IOReturn VoodooI2CDeviceNub::callPlatformFunction(const char *functionName,
-                                                  bool waitForFunction,
-                                                  void *param1,
-                                                  void *param2,
-                                                  void *param3,
-                                                  void *param4) {
-    if (functionName) {
-        setProperty("VoodooI2C_LastCallPlatformName_Char", functionName);
-    }
-    
-    const OSSymbol *sym = OSSymbol::withCString(functionName);
-    IOReturn ret = kIOReturnUnsupported;
-    
-    if (sym) {
-        ret = callPlatformFunction(sym, waitForFunction, param1, param2, param3, param4);
-        sym->release();
-    } else {
-        ret = super::callPlatformFunction(functionName, waitForFunction, param1, param2, param3, param4);
-    }
-    
-    return ret;
-}
 
 IOReturn VoodooI2CDeviceNub::transferI2CToAddress(VoodooI2CAddressedTransfer *request) {
     if (!request || request->address > 0x7F) {
