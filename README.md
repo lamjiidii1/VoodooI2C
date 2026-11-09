@@ -26,12 +26,23 @@ The following Intel I2C controllers are fully supported:
 6. `pci8086,a368`, `pci8086,a369`, `pci8086,a36a` and `pci8086,a36b` - Coffee Lake era
 7. `pci8086,2e8`, `pci8086,2e9`, `pci8086,2ea`, `pci8086,2eb`, `pci8086,6e8`, `pci8086,6e9`, `pci8086,6ea` and `pci8086,6eb`- Comet Lake era
 8. `pci8086,34e8`, `pci8086,34e9`, `pci8086,34ea` and `pci8086,34eb` - Ice Lake era
+9. `pci8086,a0e8`, `pci8086,a0e9`, `pci8086,a0ea` and `pci8086,a0eb` - Tiger Lake era
+10. `pci8086,51e8`, `pci8086,51e9`, `pci8086,51ea`, `pci8086,51eb`, `pci8086,51c5`, `pci8086,51c6`, `pci8086,51d8` - Alder Lake / Raptor Lake era (e.g. Alder Lake-UP4, LP, and PCH)
 
 The following device classes are fully supported:
 
 1. I2C-HID devices
 2. ELAN devices
 3. FTE devices
+4. Multi-address secondary slave devices (such as dual CS35L41 smart amplifiers via `CirrusAudioFixup`)
+
+### Smart Audio Amplifier & Multi-Address Support
+
+This fork includes:
+- **`transferI2CToAddress` interface**: Published via `callPlatformFunction("VOODOO_I2C_TRANSFER_TO_ADDRESS", ...)` to allow client drivers like `CirrusAudioFixup` to perform reads/writes to arbitrary slave addresses (e.g. Left amp `0x40` and Right amp `0x41` grouped under a single ACPI device nub).
+- **Submodule Update for Alder/Tiger Lake GPIO**: The bundled `Dependencies/VoodooGPIO` is updated to include `VoodooGPIOTigerLakeLP` (`INTC1055`), enabling simultaneous support for I2C trackpads and smart audio amplifiers.
+- **Log overhead elimination**: Removed per-transfer debug message flood and unnecessary property mutations during large DSP firmware transfers, preventing kernel lockups during boot.
+
 
 Note that there is sometimes an overlap between device classes. For example, some ELAN devices may also be I2C-HID devices.
 
